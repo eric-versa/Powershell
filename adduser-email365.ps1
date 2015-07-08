@@ -98,14 +98,6 @@ $objForm.Add_Shown({$objForm.Activate()})
 [void] $objForm.ShowDialog()
 
 $last
-
-
-#Creates an Exchange Online session
-$ExchangeSession = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://ps.outlook.com/powershell -Credential $credential -Authentication Basic -AllowRedirection
-
-#Import session commands
-Import-PSSession $ExchangeSession 
-
 #This section creates a list of email domains to join the user to
 $x = @()
 
@@ -173,4 +165,30 @@ $objForm.Topmost = $True
 $objForm.Add_Shown({$objForm.Activate()})
 [void] $objForm.ShowDialog()
 
-$x
+$domain
+
+$title = "Add User"
+$message = "Do you want to add the following user?"
+
+$yes = New-Object System.Management.Automation.Host.ChoiceDescription "&Yes", `
+    "Yes will add the users email."
+
+$no = New-Object System.Management.Automation.Host.ChoiceDescription "&No", `
+    "No will stop adding users email."
+
+$options = [System.Management.Automation.Host.ChoiceDescription[]]($yes, $no)
+
+$result = $host.ui.PromptForChoice($title, $message, $options, 0) 
+
+switch ($result)
+    {
+        0 {"You selected Yes." print $first,$last,$domain}
+        1 {"You selected No." exit}
+    }
+
+#Creates an Exchange Online session
+$ExchangeSession = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://ps.outlook.com/powershell -Credential $credential -Authentication Basic -AllowRedirection
+
+#Import session commands
+Import-PSSession $ExchangeSession 
+
