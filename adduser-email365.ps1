@@ -1,4 +1,4 @@
-#This Script connects to office365 and creates a user from userinput "firstname" "lastname" 
+#This Script connects to office365 and creates a user from user input "first name" "last name" 
 
 #Capture administrative credential for future connections.
 $credential = get-credential
@@ -14,7 +14,7 @@ $objForm.StartPosition = "CenterScreen"
 
 $objForm.KeyPreview = $True
 $objForm.Add_KeyDown({if ($_.KeyCode -eq "Enter") 
-    {$x=$objTextBox.Text;$objForm.Close()}})
+    {$first=$objTextBox.Text;$objForm.Close()}})
 $objForm.Add_KeyDown({if ($_.KeyCode -eq "Escape") 
     {$objForm.Close()}})
 
@@ -22,7 +22,7 @@ $OKButton = New-Object System.Windows.Forms.Button
 $OKButton.Location = New-Object System.Drawing.Size(75,120)
 $OKButton.Size = New-Object System.Drawing.Size(75,23)
 $OKButton.Text = "OK"
-$OKButton.Add_Click({$x=$objTextBox.Text;$objForm.Close()})
+$OKButton.Add_Click({$first=$objTextBox.Text;$objForm.Close()})
 $objForm.Controls.Add($OKButton)
 
 $CancelButton = New-Object System.Windows.Forms.Button
@@ -49,7 +49,7 @@ $objForm.Add_Shown({$objForm.Activate()})
 [void] $objForm.ShowDialog()
 
 $first
-
+#strFirstName = $first
 
 
 #ask for last name of user
@@ -63,7 +63,7 @@ $objForm.StartPosition = "CenterScreen"
 
 $objForm.KeyPreview = $True
 $objForm.Add_KeyDown({if ($_.KeyCode -eq "Enter") 
-    {$x=$objTextBox.Text;$objForm.Close()}})
+    {$last=$objTextBox.Text;$objForm.Close()}})
 $objForm.Add_KeyDown({if ($_.KeyCode -eq "Escape") 
     {$objForm.Close()}})
 
@@ -71,7 +71,7 @@ $OKButton = New-Object System.Windows.Forms.Button
 $OKButton.Location = New-Object System.Drawing.Size(75,120)
 $OKButton.Size = New-Object System.Drawing.Size(75,23)
 $OKButton.Text = "OK"
-$OKButton.Add_Click({$x=$objTextBox.Text;$objForm.Close()})
+$OKButton.Add_Click({$last=$objTextBox.Text;$objForm.Close()})
 $objForm.Controls.Add($OKButton)
 
 $CancelButton = New-Object System.Windows.Forms.Button
@@ -98,8 +98,10 @@ $objForm.Add_Shown({$objForm.Activate()})
 [void] $objForm.ShowDialog()
 
 $last
+#strLastName = $last
+
 #This section creates a list of email domains to join the user to
-$x = @()
+$domain = @()
 
 [void] [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
 [void] [System.Reflection.Assembly]::LoadWithPartialName("System.Drawing") 
@@ -114,7 +116,7 @@ $objForm.KeyPreview = $True
 $objForm.Add_KeyDown({if ($_.KeyCode -eq "Enter") 
     {
         foreach ($objItem in $objListbox.SelectedItems)
-            {$x += $objItem}
+            {$domain += $objItem}
         $objForm.Close()
     }
     })
@@ -130,7 +132,7 @@ $OKButton.Text = "OK"
 $OKButton.Add_Click(
    {
         foreach ($objItem in $objListbox.SelectedItems)
-            {$x += $objItem}
+            {$domain += $objItem}
         $objForm.Close()
    })
 
@@ -166,9 +168,13 @@ $objForm.Add_Shown({$objForm.Activate()})
 [void] $objForm.ShowDialog()
 
 $domain
+#strDomainName = $domain
 
-$title = "Add User"
-$message = "Do you want to add the following user?"
+$FirstInitialLastName = "{0}{1}" -f ($first)[0],$last
+
+#This section asks if they want to add the displayed user which will also troubleshoot formatting
+$title = "Add User" 
+$message = "Do you want to add $FirstInitialLastName$domain" 
 
 $yes = New-Object System.Management.Automation.Host.ChoiceDescription "&Yes", `
     "Yes will add the users email."
@@ -182,13 +188,14 @@ $result = $host.ui.PromptForChoice($title, $message, $options, 0)
 
 switch ($result)
     {
-        0 {"You selected Yes." print $first,$last,$domain}
-        1 {"You selected No." exit}
+        0 {"You selected Yes." }
+        1 {"You selected No." }
     }
 
+
+	
 #Creates an Exchange Online session
 $ExchangeSession = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://ps.outlook.com/powershell -Credential $credential -Authentication Basic -AllowRedirection
 
 #Import session commands
 Import-PSSession $ExchangeSession 
-
