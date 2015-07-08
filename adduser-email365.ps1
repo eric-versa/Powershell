@@ -189,7 +189,7 @@ $result = $host.ui.PromptForChoice($title, $message, $options, 0)
 switch ($result)
     {
         0 {"You selected Yes." }
-        1 {"You selected No." }
+        1 {"You selected No."}
     }
 
 
@@ -199,3 +199,8 @@ $ExchangeSession = New-PSSession -ConfigurationName Microsoft.Exchange -Connecti
 
 #Import session commands
 Import-PSSession $ExchangeSession 
+
+#Create Mailbox
+New-MailUser -Name $first" "$last -MicrosoftOnlineServicesID $FirstInitialLastName$domain
+
+Remove-pssession $ExchangeSession 
